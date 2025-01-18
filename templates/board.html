@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if against_bot and current_player == 2 and not game_over %}
+    <meta http-equiv="refresh" content="5; url=/bot_move/{{ game_id }}">
+    {%endif%}
     <title>Pentago</title>
     <style>
         table {
             border-collapse: collapse;
             margin: auto;
+            position: relative;
         }
         td {
             width: 50px;
@@ -23,15 +27,42 @@
         td.quadrant-border-left { border-left: 4px solid black; }
         td.quadrant-border-right { border-right: 4px solid black; }
 
+        button{
+            cursor: pointer;
+        }
+
         button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        .board-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: auto;
+        }
+
+        .rotate-button {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .rotate-button:hover{
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
     <h1 style="text-align: center;">Pentago</h1>
-      <h2 style="text-align: center;">
+    <h2 style="text-align: center;">
         {% if game_over %}
             {% if winner == 'draw' %}
                 It's a draw!
@@ -49,50 +80,81 @@
             {% endif %}
         {% endif %}
     </h2>
-    <table>
-        {% for i, row in enumerate(board) %}
-        <tr>
-            {% for j, cell in enumerate(row) %}
-            <td class="
-                {% if i == 0 or i == 3 %}quadrant-border-top{% endif %}
-                {% if i == 2 or i == 5 %}quadrant-border-bottom{% endif %}
-                {% if j == 0 or j == 3 %}quadrant-border-left{% endif %}
-                {% if j == 2 or j == 5 %}quadrant-border-right{% endif %}
-            ">
-                {% if cell == 0 %}
-                <form action="/move/{{ game_id }}" method="post" style="margin: 0;">
-                    <input type="hidden" name="row" value="{{ i }}">
-                    <input type="hidden" name="col" value="{{ j }}">
-                    <button type="submit" style="width: 100%; height: 100%; background: none; border: none;"
-                        {% if rotation_required %}disabled{% endif %}>+</button>
-                </form>
-                {% elif cell == 1 %}
-                ⚫
-                {% elif cell == 2 %}
-                ⚪
-                {% endif %}
-            </td>
+
+    <!-- Board Container -->
+    <div class="board-container">
+        <table>
+            {% for i, row in enumerate(board) %}
+            <tr>
+                {% for j, cell in enumerate(row) %}
+                <td class="
+                    {% if i == 0 or i == 3 %}quadrant-border-top{% endif %}
+                    {% if i == 2 or i == 5 %}quadrant-border-bottom{% endif %}
+                    {% if j == 0 or j == 3 %}quadrant-border-left{% endif %}
+                    {% if j == 2 or j == 5 %}quadrant-border-right{% endif %}
+                ">
+                    {% if cell == 0 %}
+                    <form action="/move/{{ game_id }}" method="post" style="margin: 0;">
+                        <input type="hidden" name="row" value="{{ i }}">
+                        <input type="hidden" name="col" value="{{ j }}">
+                        <button type="submit" style="width: 100%; height: 100%; background: none; border: none;"
+                            {% if rotation_required %}disabled{% endif %}>+</button>
+                    </form>
+                    {% elif cell == 1 %}
+                    ⚫
+                    {% elif cell == 2 %}
+                    ⚪
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
+
+        <!-- Rotate Buttons -->
+        {% if not game_over %}
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; top: -10px; left: -50px;">
+            <input type="hidden" name="quadrant" value="1">
+            <button type="submit" name="direction" value="cw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-1">↻</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; top: -10px; right: -10px;">
+            <input type="hidden" name="quadrant" value="2">
+            <button type="submit" name="direction" value="cw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-2">↻</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; bottom: 0; left: -50px;">
+            <input type="hidden" name="quadrant" value="3">
+            <button type="submit" name="direction" value="ccw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-3">↺</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; bottom: 0; right: -10px;">
+            <input type="hidden" name="quadrant" value="4">
+            <button type="submit" name="direction" value="ccw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-4">↺</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; top: 40px; left: -50px;">
+            <input type="hidden" name="quadrant" value="1">
+            <button type="submit" name="direction" value="ccw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-1">↺</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; top: 40px; right: -10px;">
+            <input type="hidden" name="quadrant" value="2">
+            <button type="submit" name="direction" value="ccw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-2">↺</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; bottom: 50px; left: -50px;">
+            <input type="hidden" name="quadrant" value="3">
+            <button type="submit" name="direction" value="cw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-3">↻</button>
+        </form>
+        <form action="/rotate/{{ game_id }}" method="post" style="position: absolute; bottom: 50px; right: -10px;">
+            <input type="hidden" name="quadrant" value="4">
+            <button type="submit" name="direction" value="cw" {% if not rotation_required %}disabled{% endif %} class="rotate-button rotate-button-4">↻</button>
+        </form>
+        {% endif %}
+    </div>
+
     {% if game_over %}
-        <div style="text-align: center; margin-top: 20px;">
-            <form action="/reset/{{ game_id }}" method="get">
-                <button type="submit" style="padding: 10px 20px; font-size: 16px;">New Game</button>
-            </form>
-        </div>
-    {% else %}
-    <form action="/rotate/{{ game_id }}" method="post" style="text-align: center; margin-top: 20px;">
-        <label for="quadrant">Quadrant (1-4):</label>
-        <input type="number" name="quadrant" id="quadrant" min="1" max="4" required>
-        <label for="direction">Direction:</label>
-        <select name="direction" id="direction">
-            <option value="cw">Clockwise</option>
-            <option value="ccw">Counterclockwise</option>
-        </select>
-        <button type="submit" {% if not rotation_required %}disabled{% endif %}>Rotate</button>
-    </form>
+    <div style="text-align: center; margin-top: 40px;">
+        <form action="/reset/{{ game_id }}" method="get">
+            <button type="submit" style="padding: 10px 20px; font-size: 16px;">New Game</button>
+        </form>
+    </div>
     {% endif %}
 </body>
 </html>
+

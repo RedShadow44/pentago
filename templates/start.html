@@ -8,24 +8,38 @@
         body {
             text-align: center;
             font-family: Arial, sans-serif;
+            margin-top: 100px;
         }
         h1 {
             font-size: 36px;
-            margin-top: 50px;
+        }
+        p {
+            font-size: 18px;
+            margin-bottom: 30px;
         }
         button {
             padding: 15px 30px;
             font-size: 18px;
-            margin-top: 20px;
+            margin: 10px;
             cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <h1>Welcome to Pentago!</h1>
     <p>A strategic marble-placing and rotating game.</p>
-    <form action="/new_game" method="get">
-        <button type="submit">Start Game</button>
+    <form action="/new_game/true" method="get" style="display: inline;">
+        <button type="submit">Play Against the Bot</button>
+    </form>
+    <form action="/new_game/false" method="get" style="display: inline;">
+        <button type="submit">Play Against Another Player</button>
     </form>
 </body>
 </html>
